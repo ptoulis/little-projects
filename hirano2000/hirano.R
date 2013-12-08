@@ -270,11 +270,10 @@ run.mcmc <- function(theta0, Data,
               compliance.chain=C.chain[, keep.iters]))
 }
 
-mcmc.full.posterior <- function(Data, niters=1000, proposal.scale=0.1) {
+mcmc.full.posterior <- function(theta0, Data, niters=1000, proposal.scale=0.1) {
   # Runs MCMC with the prior only
   # We call it catalytic because it should match the ITT that is 
   # contained in the DATA itself
-  theta0 = perturb.theta(empty.theta(), epsilon=3)
   log.density <- function(theta, compliance, Data) {
    return(log.likelihood.complete(theta, compliance, Data=Data) + 
           log.prior(theta=theta, X=Data$X))

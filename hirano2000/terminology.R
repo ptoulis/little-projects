@@ -15,7 +15,7 @@
 # TREATS are treatment arms. Here is is ACTIVE (Z=1) or CONTROL(Z=0)
 # 
 rm(list=ls())
-source("~/A/code/repos/r-toolkit/checks.R")
+source("../../r-toolkit/checks.R")
 
 # Dimension of the covariates.
 kXdim <- 3

@@ -158,7 +158,7 @@ logit <- function(x) {
 CHECK_Data <- function(Data) {
   # Checks the DATA object.
   # DATA = {Z, W, Y, X}
-  CHECK_MEMBER(names(Data), c("Z", "W", "X", "Y", "ITT", "C"), msg="Data members")
+  CHECK_MEMBER(names(Data), c("Z", "W", "X", "X0", "Y", "ITT", "C"), msg="Data members")
   N = length(Data$Z)
   CHECK_EQ(length(Data$Y), N, msg="Length of Yobs")
   CHECK_EQ(length(Data$W), N, msg="Length of Wobs")
@@ -185,6 +185,7 @@ read.data <- function() {
   Z = data$treatment.assigned
   W = data$treatment.received
   D = list(X=X, Y=Y, W=W, Z=Z, ITT=list())
+  D$X0 <- X
   D = normalize.data(D)
   return(D)
 }

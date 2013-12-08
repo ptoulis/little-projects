@@ -470,3 +470,61 @@ summarize.ITT.samples <- function(ITT, theta) {
     hist(ITT[[t]], main=sprintf("Compliance type %s", kComplianceTypes[t]))
   }
 }
+
+q1a <- function() {
+  D = read.data()
+  ITT.effect <- function(A, B) {
+    # A is partitioning B
+    CHECK_MEMBER(A, c(0, 1))
+    B1 = B[A==1]
+    B0 = B[A==0]
+    ITTb = mean(B1) - mean(B0)
+    boot.itt <- sd(replicate(1000, { B1rep = sample(B1, size=length(B1), replace=T);
+                                     B0rep = sample(B0, size=length(B0), replace=T);
+                                      return(mean(B1rep) - mean(B0rep)) }))
+    return(list(itt=ITTb, se=boot.itt))
+  }
+
+  ITTw = ITT.effect(D$Z, D$W)
+  print(sprintf("ITT effect on W = %.3f se=%.3f", ITTw$itt, ITTw$se))
+  
+  ITTy = ITT.effect(D$Z, D$Y)
+  print(sprintf("ITT effect on Y= %.3f se=%.3f", ITTy$itt, ITTy$se))
+  
+  # IV estimate 
+  Pc = ITTw$itt
+  Pa = sum((D$W * (1-D$Z))) / sum(D$Z==0)
+  Pn = 1-Pa-Pc
+  print(sprintf("Nevertakers=%.2f Compliers=%.2f Alwaystakers=%.2f", Pn, Pc, Pa))
+  
+  get.cace.effect = function(W, Z, Y) {
+    get.Yzw.obs <- function(z, w) {
+      return(mean(Y[W==w & Z==z]))
+    }
+    
+    Y0c.obs = get.Yzw.obs(0, 0)
+    Y1c.obs = get.Yzw.obs(1, 0)
+    Y0t.obs = get.Yzw.obs(0, 1)
+    Y1t.obs = get.Yzw.obs(1, 1)
+    
+    EY0.complier = (Y0c.obs - Y1c.obs * Pn / (Pn + Pc)) / (Pc / (Pc + Pn))
+    EY1.complier = (Y1t.obs - Y0t.obs * Pa / (Pa + Pc)) / (Pc / (Pc + Pa))
+    # print(sprintf("Compliers Y0= %.3f  Y1=%.3f", EY0.complier, EY1.complier))
+    
+    tau.cace = EY1.complier - EY0.complier
+    # print(sprintf("CACE effect = %.3f", tau.cace))
+    return(tau.cace)
+  }
+  
+  tau = get.cace.effect(D$W, D$Z, D$Y)
+  N = length(D$Y)
+  # Bootstrap.
+  se = sd(replicate(1000, { units = sample(1:N, size=N, replace=T);
+                           W = D$W[units]
+                           Z = D$Z[units]
+                           Y = D$Y[units]
+                           get.cace.effect(W, Z, Y)
+                           }))
+  print(sprintf("Outcome = %.3f  se=%.3f", tau, se))
+}
+

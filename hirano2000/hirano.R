@@ -459,6 +459,7 @@ sample.ITT.mcmc <- function(mcmc.out, use.obs=T) {
 summarize.ITT.samples <- function(ITT, theta) {
   par(mfrow=c(3,1))
   X = sample.X(1000)
+  full.names = list(N="Never-taker", C="Complier", A="Always-taker")
   for(t in 1:length(ITT)) {
     print(sprintf("Summary for compliance %s", t))
     print(summary(ITT[[t]]))
@@ -466,7 +467,7 @@ summarize.ITT.samples <- function(ITT, theta) {
     m1 = mean(logistic(X %*% get.beta.vector(t, z=1, theta=theta)))
     m0 = mean(logistic(X %*% get.beta.vector(t, z=0, theta=theta)))
     print(sprintf("Heuristic difference (ITT effect) = %.3f", m1-m0))
-    hist(ITT[[t]], main=sprintf("Compliance type %s", kComplianceTypes[t]))
+    hist(ITT[[t]], xlab="ITT effect", breaks=50, main=sprintf("Compliance type %s", full.names[[t]]))
   }
 }
 
